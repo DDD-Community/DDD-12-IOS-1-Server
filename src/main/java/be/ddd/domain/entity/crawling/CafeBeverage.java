@@ -26,4 +26,7 @@ public class CafeBeverage extends BaseTimeEntity {
     private CafeStore cafeStore;
 
     private BeverageNutrition beverageNutrition;
+
+    @Enumerated(EnumType.STRING)
+    private BeverageType beverageType;
 }
