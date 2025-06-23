@@ -12,5 +12,5 @@ public interface CafeStoreRepository extends Repository<CafeStore, Long> {
 
     List<CafeStore> findAllByCafeBrandIn(Collection<CafeBrand> cafeBrands);
 
-    CafeStore saveAll(List<CafeStore> cafeStores);
+    <S extends CafeStore> List<S> saveAll(Iterable<S> entities);
 }
