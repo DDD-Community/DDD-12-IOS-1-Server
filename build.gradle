@@ -1,8 +1,15 @@
+buildscript {
+    dependencies {
+        classpath 'org.flywaydb:flyway-mysql:9.16.3'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id("com.diffplug.spotless") version "7.0.3"
+    id "org.flywaydb.flyway" version "9.16.3"
 }
 
 group = 'be.ddd'
@@ -86,4 +93,13 @@ tasks.named('clean') {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+flyway {
+    url = findProperty('flywayUrl') ?: System.getenv('FLYWAY_URL')
+    user = findProperty('flywayUser') ?: System.getenv('FLYWAY_USER')
+    password = findProperty('flywayPassword') ?: System.getenv('FLYWAY_PASSWORD')
+    locations = ['classpath:db/migration']
+    baselineOnMigrate = true
+    cleanDisabled = false
 }
