@@ -37,4 +37,10 @@ public class CafeStore extends BaseTimeEntity {
         this.cafeBrand = cafeBrand;
         this.beverages = beverages;
     }
+
+    public static CafeStore of(CafeBrand brand) {
+        CafeStore store = new CafeStore();
+        store.cafeBrand = brand;
+        return store;
+    }
 }
