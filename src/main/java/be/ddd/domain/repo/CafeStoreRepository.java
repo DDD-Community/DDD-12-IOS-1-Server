@@ -10,6 +10,8 @@ import org.springframework.data.repository.Repository;
 public interface CafeStoreRepository extends Repository<CafeStore, Long> {
     Optional<CafeStore> findById(Long id);
 
+    Optional<CafeStore> findByCafeBrand(CafeBrand cafeBrand);
+
     List<CafeStore> findAllByCafeBrandIn(Collection<CafeBrand> cafeBrands);
 
     <S extends CafeStore> List<S> saveAll(Iterable<S> entities);

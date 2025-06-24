@@ -34,8 +34,8 @@ public class CafeBeverage extends BaseTimeEntity {
     private BeverageType beverageType;
 
     public void updateFromDto(LambdaBeverageDto dto) {
-        if (dto.imgUrl() != null) {
-            this.imgUrl = dto.imgUrl();
+        if (dto.image() != null) {
+            this.imgUrl = dto.image();
         }
 
         if (dto.beverageType() != null) {
@@ -43,8 +43,8 @@ public class CafeBeverage extends BaseTimeEntity {
                     BeverageType.valueOf(dto.beverageType().toUpperCase().replace(" ", "_"));
         }
 
-        if (dto.beverageNutritionDto() != null) {
-            this.beverageNutrition = BeverageNutrition.from(dto.beverageNutritionDto());
+        if (dto.beverageNutrition() != null) {
+            this.beverageNutrition = BeverageNutrition.from(dto.beverageNutrition());
         }
     }
 
