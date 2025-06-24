@@ -1,6 +1,6 @@
 package be.ddd.domain.entity.crawling;
 
-import be.ddd.application.beverage.dto.LambdaBeverageDto;
+import be.ddd.application.batch.dto.LambdaBeverageDto;
 import be.ddd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class CafeBeverage extends BaseTimeEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cafe_beverage_id")
     private Long id;
 
