@@ -1,17 +1,16 @@
 package be.ddd.api.cafe;
 
 import be.ddd.application.beverage.CafeBeverageQueryService;
+import be.ddd.application.beverage.dto.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.common.dto.ApiResponse;
 import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import jakarta.validation.constraints.Positive;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cafe-beverages")
@@ -31,5 +30,12 @@ public class CafeBeverageAPI {
         CursorPageResponse<CafeBeveragePageDto> results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(decodedCursor, size);
         return ApiResponse.success(results);
+    }
+
+    @GetMapping("{productId}")
+    public ApiResponse<?> getCafeBeverageByProductId(@PathVariable("productId") UUID productId) {
+        CafeBeverageDetailsDto beverageDetails =
+                cafeBeverageQueryService.getCafeBeverageByProductId(productId);
+        return ApiResponse.success(beverageDetails);
     }
 }

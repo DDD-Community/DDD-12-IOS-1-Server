@@ -1,5 +1,6 @@
 package be.ddd.infra.exception;
 
+import be.ddd.domain.exception.CafeBeverageNotFoundException;
 import java.util.Set;
 import lombok.Getter;
 import org.hibernate.exception.ConstraintViolationException;
@@ -22,7 +23,10 @@ public enum ErrorCode {
             HttpStatus.METHOD_NOT_ALLOWED,
             "지원하지 않는 HTTP 메서드입니다.",
             Set.of(HttpRequestMethodNotSupportedException.class)),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", Set.of());
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", Set.of()),
+
+    CAFE_BEVERAGE_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "카페 음료를 찾을 수 없습니다.", Set.of(CafeBeverageNotFoundException.class));
 
     private final HttpStatusCode status;
     private final String code;
