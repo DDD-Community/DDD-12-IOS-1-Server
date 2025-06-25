@@ -39,7 +39,7 @@ public class StringBase64EncodingUtil {
     public Long decodeSignedCursor(String token) {
         String[] parts = token.split("\\.", 2);
         if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid cursor token format");
+            throw new IllegalArgumentException();
         }
 
         String cursorB64 = parts[0];
