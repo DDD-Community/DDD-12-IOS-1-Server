@@ -1,4 +1,4 @@
-package be.ddd.api;
+package be.ddd.api.admin;
 
 import be.ddd.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +24,9 @@ public class BeverageBatchAPI {
     @PostMapping("/trigger-beverage-batch")
     public ApiResponse<?> trigger() throws Exception {
         JobParameters params =
-                new JobParametersBuilder()
-                        .addLong("run.id", System.currentTimeMillis())
-                        .toJobParameters();
+            new JobParametersBuilder()
+                .addLong("run.id", System.currentTimeMillis())
+                .toJobParameters();
         JobExecution exec = jobLauncher.run(beverageJob, params);
         return ApiResponse.success("Batch status: " + exec.getStatus());
         /*return webClient
