@@ -5,6 +5,7 @@ import be.ddd.domain.entity.crawling.BeverageType;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeStore;
 import java.util.Optional;
+import java.util.UUID;
 
 public record LambdaBeverageDto(
         String name, String image, String beverageType, BeverageNutritionDto beverageNutrition) {
@@ -22,6 +23,6 @@ public record LambdaBeverageDto(
                         .map(BeverageType::valueOf)
                         .orElse(null);
 
-        return CafeBeverage.of(name, cafeStore, image, nutrition, type);
+        return CafeBeverage.of(name, UUID.randomUUID(), cafeStore, image, nutrition, type);
     }
 }
