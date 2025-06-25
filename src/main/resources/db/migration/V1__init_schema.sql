@@ -30,6 +30,7 @@ CREATE TABLE cafe_beverages
 (
     cafe_beverage_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name             VARCHAR(255) NOT NULL,
+    product_id       BINARY(16)   NOT NULL UNIQUE,
     cafe_store_id    BIGINT       NOT NULL,
     serving_kcal     INT          NOT NULL DEFAULT 0,
     saturated_fat_g  DOUBLE       NOT NULL DEFAULT 0,
