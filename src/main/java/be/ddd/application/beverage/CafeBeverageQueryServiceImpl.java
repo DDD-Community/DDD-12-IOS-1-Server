@@ -1,6 +1,6 @@
 package be.ddd.application.beverage;
 
-import be.ddd.application.beverage.dto.CafeBeverageDto;
+import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBeverage;
@@ -21,7 +21,8 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     private final StringBase64EncodingUtil encodingUtil;
 
     @Override
-    public CursorPageResponse<CafeBeverageDto> getCafeBeverageCursorPage(Long cursor, int size) {
+    public CursorPageResponse<CafeBeveragePageDto> getCafeBeverageCursorPage(
+            Long cursor, int size) {
         Long dynamicCursor = Optional.ofNullable(cursor).orElse(0L);
 
         PageRequest pageReq = PageRequest.of(0, size + 1, Sort.by("id").ascending());
@@ -30,8 +31,8 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
         boolean hasNext = fetch.size() > size;
 
-        List<CafeBeverageDto> pageResults =
-                fetch.stream().limit(size).map(CafeBeverageDto::from).toList();
+        List<CafeBeveragePageDto> pageResults =
+                fetch.stream().limit(size).map(CafeBeveragePageDto::from).toList();
 
         Long nextCursor = hasNext ? pageResults.get(pageResults.size() - 1).id() : null;
 

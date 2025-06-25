@@ -1,7 +1,7 @@
 package be.ddd.api.cafe;
 
 import be.ddd.application.beverage.CafeBeverageQueryService;
-import be.ddd.application.beverage.dto.CafeBeverageDto;
+import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.common.dto.ApiResponse;
 import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
@@ -21,13 +21,13 @@ public class CafeBeverageAPI {
     private final StringBase64EncodingUtil encodingUtil;
 
     @GetMapping
-    public ApiResponse<?> getCafeBeverages(
+    public ApiResponse<CursorPageResponse<CafeBeveragePageDto>> getCafeBeverages(
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "15") int size) {
         Long decodedCursor =
                 Optional.ofNullable(cursor).map(encodingUtil::decodeSignedCursor).orElse(0L);
 
-        CursorPageResponse<CafeBeverageDto> results =
+        CursorPageResponse<CafeBeveragePageDto> results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(decodedCursor, size);
         return ApiResponse.success(results);
     }
