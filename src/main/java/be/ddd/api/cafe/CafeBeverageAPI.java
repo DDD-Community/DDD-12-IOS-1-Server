@@ -5,6 +5,7 @@ import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.common.dto.ApiResponse;
 import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
+import jakarta.validation.constraints.Positive;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class CafeBeverageAPI {
     @GetMapping
     public ApiResponse<CursorPageResponse<CafeBeveragePageDto>> getCafeBeverages(
             @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "15") int size) {
+            @RequestParam(defaultValue = "15") @Positive int size) {
         Long decodedCursor =
                 Optional.ofNullable(cursor).map(encodingUtil::decodeSignedCursor).orElse(0L);
 
