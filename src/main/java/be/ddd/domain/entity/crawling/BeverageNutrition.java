@@ -1,12 +1,16 @@
 package be.ddd.domain.entity.crawling;
 
+import be.ddd.application.batch.dto.BeverageNutritionDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class BeverageNutrition {
 
     @Column(name = "SERVING_KCAL", nullable = false)
@@ -27,6 +31,16 @@ public class BeverageNutrition {
     @Column(name = "CAFFEINE_MG", nullable = false)
     private Integer caffeineMg; // 카페인(mg)
 
+    public static BeverageNutrition from(BeverageNutritionDto dto) {
+        return new BeverageNutrition(
+                Objects.requireNonNullElse(dto.servingKcal(), 0),
+                Objects.requireNonNullElse(dto.saturatedFatG(), 0.0),
+                Objects.requireNonNullElse(dto.proteinG(), 0.0),
+                Objects.requireNonNullElse(dto.sodiumMg(), 0),
+                Objects.requireNonNullElse(dto.sugarG(), 0),
+                Objects.requireNonNullElse(dto.caffeineMg(), 0));
+    }
+
     public BeverageNutrition(
             Integer servingKcal,
             Double saturatedFatG,
@@ -40,5 +54,9 @@ public class BeverageNutrition {
         this.sodiumMg = sodiumMg;
         this.sugarG = sugarG;
         this.caffeineMg = caffeineMg;
+    }
+
+    public static BeverageNutrition empty() {
+        return new BeverageNutrition(0, 0.0, 0.0, 0, 0, 0);
     }
 }
