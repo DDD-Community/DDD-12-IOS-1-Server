@@ -39,7 +39,7 @@ spotless {
         endWithNewline()
         removeUnusedImports()
 
-        targetExclude 'build/**'
+        targetExclude 'build/generated/querydsl/**'
     }
 }
 
@@ -85,7 +85,9 @@ tasks.withType(JavaCompile) {
 }
 
 sourceSets {
-    main.java.srcDirs += "$projectDir/build/generated"
+    main {
+        java.srcDirs += "$buildDir/generated/querydsl"
+    }
 }
 
 clean {
