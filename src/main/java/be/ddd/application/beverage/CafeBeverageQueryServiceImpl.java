@@ -6,13 +6,13 @@ import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBeverage;
+import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.exception.CafeBeverageNotFoundException;
 import be.ddd.domain.repo.CafeBeverageRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,25 +22,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     private final CafeBeverageRepository beverageRepository;
     private final StringBase64EncodingUtil encodingUtil;
+    private final CafeBeverageRepository cafeBeverageRepository;
 
     @Override
     public CursorPageResponse<CafeBeveragePageDto> getCafeBeverageCursorPage(
-            Long cursor, int size) {
+            Long cursor, int size, Optional<CafeBrand> brandFilter) {
 
-        PageRequest pageReq = PageRequest.of(0, size + 1, Sort.by("id").ascending());
-        List<CafeBeverage> fetch =
-                beverageRepository.findByIdGreaterThanOrderByIdAsc(cursor, pageReq);
+        CafeBrand brand = brandFilter.orElse(null);
 
-        boolean hasNext = fetch.size() > size;
+        List<CafeBeverage> fetched = cafeBeverageRepository.findWithCursor(cursor, size + 1, brand);
 
-        List<CafeBeveragePageDto> pageResults =
-                fetch.stream().limit(size).map(CafeBeveragePageDto::from).toList();
+        boolean hasNext = fetched.size() > size;
 
         String nextCursor = null;
         if (hasNext) {
-            long lastId = fetch.get(size - 1).getId();
-            nextCursor = encodingUtil.encodeSignedCursor(lastId);
+            nextCursor = encodingUtil.encodeSignedCursor(fetched.get(size - 1).getId());
         }
+
+        List<CafeBeveragePageDto> pageResults =
+                fetched.stream().limit(size).map(CafeBeveragePageDto::from).toList();
 
         return new CursorPageResponse<>(pageResults, nextCursor, hasNext);
     }
