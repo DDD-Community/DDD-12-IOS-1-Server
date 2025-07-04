@@ -2,7 +2,7 @@ package be.ddd.domain.entity.crawling;
 
 public enum BeverageType {
     ESPRESSO,
-    Cold_Brew,
+    COLD_BREW,
     FRAPPUCCINO,
     BLENDED,
     TEA,

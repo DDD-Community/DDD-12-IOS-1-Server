@@ -11,7 +11,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum CafeBrand {
-    STARBUCKS("starbucks");
+    STARBUCKS("starbucks"),
+    TEST("test");
 
     private static final Map<String, CafeBrand> BY_DISPLAY_NAME =
             Arrays.stream(values())
