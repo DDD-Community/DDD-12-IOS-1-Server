@@ -63,19 +63,15 @@ public class CafeBeverageAPI {
         return ApiResponse.success(countDto);
     }
 
-    @PostMapping("{beverageId}/like")
-    public ApiResponse<?> likeBeverage(
-            @PathVariable Long beverageId,
-            @RequestParam Long memberId) { // TODO: get memberId from security context
-        beverageLikeService.likeBeverage(memberId, beverageId);
+    @PostMapping("{productId}/like")
+    public ApiResponse<?> likeBeverage(@PathVariable UUID productId) {
+        beverageLikeService.likeBeverage(MEMBER_ID, productId);
         return ApiResponse.success("ok");
     }
 
-    @DeleteMapping("{beverageId}/unlike")
-    public ApiResponse<?> unlikeBeverage(
-            @PathVariable Long beverageId,
-            @RequestParam Long memberId) { // TODO: get memberId from security context
-        beverageLikeService.unlikeBeverage(memberId, beverageId);
+    @DeleteMapping("{productId}/unlike")
+    public ApiResponse<?> unlikeBeverage(@PathVariable UUID productId) {
+        beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
         return ApiResponse.success("ok");
     }
 }

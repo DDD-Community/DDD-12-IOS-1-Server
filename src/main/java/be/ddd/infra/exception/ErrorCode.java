@@ -1,9 +1,6 @@
 package be.ddd.infra.exception;
 
-import be.ddd.domain.exception.AlreadyLikeBeverageException;
-import be.ddd.domain.exception.CafeBeverageNotFoundException;
-import be.ddd.domain.exception.MemberBeverageLikeNotFoundException;
-import be.ddd.domain.exception.MemberNotFoundException;
+import be.ddd.domain.exception.*;
 import java.util.Set;
 import lombok.Getter;
 import org.hibernate.exception.ConstraintViolationException;
@@ -40,7 +37,10 @@ public enum ErrorCode {
     MEMBER_BEVERAGE_LIKE_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "회원이 누른 찜 정보 없음",
-            Set.of(MemberBeverageLikeNotFoundException.class));
+            Set.of(MemberBeverageLikeNotFoundException.class)),
+
+    // like
+    LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "찜 정보를 찾을 수 없습니다.", Set.of(LikeNotFoundException.class));
 
     private final HttpStatusCode status;
     private final String code;
