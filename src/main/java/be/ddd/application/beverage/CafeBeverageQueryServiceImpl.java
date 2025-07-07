@@ -1,7 +1,7 @@
 package be.ddd.application.beverage;
 
-import be.ddd.application.beverage.dto.BeverageCountDto;
-import be.ddd.application.beverage.dto.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.common.dto.CursorPageResponse;
