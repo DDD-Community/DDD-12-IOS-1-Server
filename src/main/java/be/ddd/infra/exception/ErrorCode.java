@@ -1,6 +1,9 @@
 package be.ddd.infra.exception;
 
+import be.ddd.domain.exception.AlreadyLikeBeverageException;
 import be.ddd.domain.exception.CafeBeverageNotFoundException;
+import be.ddd.domain.exception.MemberBeverageLikeNotFoundException;
+import be.ddd.domain.exception.MemberNotFoundException;
 import java.util.Set;
 import lombok.Getter;
 import org.hibernate.exception.ConstraintViolationException;
@@ -25,8 +28,19 @@ public enum ErrorCode {
             Set.of(HttpRequestMethodNotSupportedException.class)),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", Set.of()),
 
+    // beverage
     CAFE_BEVERAGE_NOT_FOUND(
-            HttpStatus.NOT_FOUND, "카페 음료를 찾을 수 없습니다.", Set.of(CafeBeverageNotFoundException.class));
+            HttpStatus.NOT_FOUND, "카페 음료를 찾을 수 없습니다.", Set.of(CafeBeverageNotFoundException.class)),
+    ALREADY_LIKE_BEVERAGE_(
+            HttpStatus.BAD_REQUEST, "이미 찜 버튼을 눌렀습니다.", Set.of(AlreadyLikeBeverageException.class)),
+
+    // member
+    MEMBER_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "회원 정보를 찾을 수 없습니다.", Set.of(MemberNotFoundException.class)),
+    MEMBER_BEVERAGE_LIKE_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "회원이 누른 찜 정보 없음",
+            Set.of(MemberBeverageLikeNotFoundException.class));
 
     private final HttpStatusCode status;
     private final String code;
