@@ -37,6 +37,9 @@ public class CafeBeverage extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private BeverageType beverageType;
 
+    @Enumerated(EnumType.STRING)
+    private SugarLevel sugarLevel;
+
     public void updateFromDto(LambdaBeverageDto dto) {
         if (dto.image() != null) {
             this.imgUrl = dto.image();
@@ -49,6 +52,7 @@ public class CafeBeverage extends BaseTimeEntity {
 
         if (dto.beverageNutrition() != null) {
             this.beverageNutrition = BeverageNutrition.from(dto.beverageNutrition());
+            this.sugarLevel = SugarLevel.valueOfSugar(this.beverageNutrition.getSugarG());
         }
     }
 
@@ -59,8 +63,16 @@ public class CafeBeverage extends BaseTimeEntity {
             String imgUrl,
             BeverageNutrition beverageNutrition,
             BeverageType beverageType) {
+        SugarLevel sugarLevel = SugarLevel.valueOfSugar(beverageNutrition.getSugarG());
         return new CafeBeverage(
-                null, name, productId, cafeStore, imgUrl, beverageNutrition, beverageType);
+                null,
+                name,
+                productId,
+                cafeStore,
+                imgUrl,
+                beverageNutrition,
+                beverageType,
+                sugarLevel);
     }
 
     public CafeBeverage(
@@ -70,7 +82,8 @@ public class CafeBeverage extends BaseTimeEntity {
             CafeStore cafeStore,
             String imgUrl,
             BeverageNutrition beverageNutrition,
-            BeverageType beverageType) {
+            BeverageType beverageType,
+            SugarLevel sugarLevel) {
         this.id = id;
         this.name = name;
         this.productId = productId;
@@ -78,5 +91,6 @@ public class CafeBeverage extends BaseTimeEntity {
         this.imgUrl = imgUrl;
         this.beverageNutrition = beverageNutrition;
         this.beverageType = beverageType;
+        this.sugarLevel = sugarLevel;
     }
 }
