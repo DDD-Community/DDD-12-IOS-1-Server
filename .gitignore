@@ -38,3 +38,4 @@ out/
 
 application*.yml
 docekr/db/db
+gradle.properties
