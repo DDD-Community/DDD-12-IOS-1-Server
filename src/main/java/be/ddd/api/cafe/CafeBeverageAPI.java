@@ -2,12 +2,12 @@ package be.ddd.api.cafe;
 
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.api.dto.res.BeverageLikeDto;
+import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.common.dto.ApiResponse;
-import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -28,7 +28,7 @@ public class CafeBeverageAPI {
     private final Long MEMBER_ID = 1L;
 
     @GetMapping
-    public ApiResponse<CursorPageResponse<CafeBeveragePageDto>> getCafeBeverages(
+    public ApiResponse<CafeBeverageCursorPageDto<CafeBeveragePageDto>> getCafeBeverages(
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "15") @Positive int size,
             @RequestParam(required = false) String cafeBrand,
@@ -41,7 +41,7 @@ public class CafeBeverageAPI {
 
         Optional<SugarLevel> sugar = SugarLevel.fromParam(sugarLevel);
 
-        CursorPageResponse<CafeBeveragePageDto> results =
+        CafeBeverageCursorPageDto<CafeBeveragePageDto> results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(
                         decodedCursor, size, brand, sugar, MEMBER_ID);
         return ApiResponse.success(results);

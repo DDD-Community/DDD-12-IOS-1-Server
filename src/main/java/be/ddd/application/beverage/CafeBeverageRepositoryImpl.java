@@ -1,5 +1,6 @@
 package be.ddd.application.beverage;
 
+import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
@@ -9,7 +10,9 @@ import be.ddd.domain.entity.member.QMemberBeverageLike;
 import be.ddd.domain.repo.CafeBeverageRepositoryCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.annotation.Nullable;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -25,6 +28,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     @Override
     public List<CafeBeveragePageDto> findWithCursor(
             Long cursor, int limit, CafeBrand brand, SugarLevel sugarLevel, Long memberId) {
+
         return queryFactory
                 .select(
                         Projections.constructor(
@@ -49,26 +53,54 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                 .fetch();
     }
 
-    @Override
+    /*@Override
     public long countAll(CafeBrand brand) {
         Long cnt =
-                queryFactory
-                        .select(beverage.count())
-                        .from(beverage)
-                        .where(brandEq(brand))
-                        .fetchOne();
+            queryFactory
+                .select(beverage.count())
+                .from(beverage)
+                .where(brandEq(brand))
+                .fetchOne();
         return cnt != null ? cnt : 0L;
     }
 
     @Override
     public long countBySugar(CafeBrand brand, SugarLevel sugarLevel) {
         Long cnt =
-                queryFactory
-                        .select(beverage.count())
-                        .from(beverage)
-                        .where(brandEq(brand), sugarLevelEq(sugarLevel))
-                        .fetchOne();
+            queryFactory
+                .select(beverage.count())
+                .from(beverage)
+                .where(brandEq(brand), sugarLevelEq(sugarLevel))
+                .fetchOne();
         return cnt != null ? cnt : 0L;
+    }*/
+
+    @Override
+    public BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter) {
+        BooleanExpression brandCond =
+                brandFilter != null ? beverage.cafeStore.cafeBrand.eq(brandFilter) : null;
+
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                BeverageCountDto.class,
+                                // 전체 개수
+                                beverage.count(),
+                                // 무당
+                                new CaseBuilder()
+                                        .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
+                                        .then(1L)
+                                        .otherwise(0L)
+                                        .sum(),
+                                // 저당
+                                new CaseBuilder()
+                                        .when(beverage.sugarLevel.eq(SugarLevel.LOW))
+                                        .then(1L)
+                                        .otherwise(0L)
+                                        .sum()))
+                .from(beverage)
+                .where(brandCond)
+                .fetchOne();
     }
 
     private BooleanExpression brandEq(CafeBrand b) {

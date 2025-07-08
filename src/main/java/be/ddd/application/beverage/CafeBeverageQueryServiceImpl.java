@@ -1,16 +1,17 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
-import be.ddd.common.dto.CursorPageResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import be.ddd.domain.exception.CafeBeverageNotFoundException;
 import be.ddd.domain.repo.CafeBeverageRepository;
+import be.ddd.domain.repo.MemberBeverageLikeRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,9 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     private final CafeBeverageRepository beverageRepository;
     private final StringBase64EncodingUtil encodingUtil;
+    private final MemberBeverageLikeRepository likeRepository;
 
     @Override
-    public CursorPageResponse<CafeBeveragePageDto> getCafeBeverageCursorPage(
+    public CafeBeverageCursorPageDto<CafeBeveragePageDto> getCafeBeverageCursorPage(
             Long cursor,
             int size,
             Optional<CafeBrand> brandFilter,
@@ -48,7 +50,9 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
         List<CafeBeveragePageDto> pageResults = fetched.stream().limit(size).toList();
 
-        return new CursorPageResponse<>(pageResults, nextCursor, hasNext);
+        long likedCount = pageResults.stream().filter(CafeBeveragePageDto::isLiked).count();
+
+        return new CafeBeverageCursorPageDto<>(pageResults, nextCursor, hasNext, likedCount);
     }
 
     @Override
@@ -72,10 +76,6 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
         CafeBrand brand = brandFilter.orElse(null);
 
-        long sugarAllCount = beverageRepository.countAll(brand);
-        long sugarZeroCount = beverageRepository.countBySugar(brand, SugarLevel.ZERO);
-        long sugarLowCount = beverageRepository.countBySugar(brand, SugarLevel.LOW);
-
-        return new BeverageCountDto(sugarAllCount, sugarZeroCount, sugarLowCount);
+        return beverageRepository.countSugarLevelByBrand(brand);
     }
 }
