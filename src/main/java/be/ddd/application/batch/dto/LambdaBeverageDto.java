@@ -14,14 +14,12 @@ public record LambdaBeverageDto(
         BeverageNutrition nutrition =
                 Optional.ofNullable(beverageNutrition)
                         .map(BeverageNutrition::from)
-                        .orElseGet(BeverageNutrition::empty);
-        System.out.println("BeverageNutrition: " + nutrition);
-        System.out.println("dto:" + beverageNutrition);
+                        .orElse(BeverageNutrition.empty());
         BeverageType type =
                 Optional.ofNullable(beverageType)
                         .map(String::toUpperCase)
                         .map(BeverageType::valueOf)
-                        .orElse(null);
+                        .orElse(BeverageType.ANY);
 
         return CafeBeverage.of(name, UUID.randomUUID(), cafeStore, image, nutrition, type);
     }
