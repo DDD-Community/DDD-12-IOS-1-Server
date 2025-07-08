@@ -1,9 +1,10 @@
 package be.ddd.application.beverage;
 
+import be.ddd.api.dto.res.BeverageLikeDto;
 import java.util.UUID;
 
 public interface BeverageLikeService {
-    void likeBeverage(Long memberId, UUID productId);
+    BeverageLikeDto likeBeverage(Long memberId, UUID productId);
 
-    void unlikeBeverage(Long memberId, UUID productId);
+    BeverageLikeDto unlikeBeverage(Long memberId, UUID productId);
 }

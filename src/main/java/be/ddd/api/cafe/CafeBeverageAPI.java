@@ -1,6 +1,7 @@
 package be.ddd.api.cafe;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageLikeDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
@@ -65,13 +66,13 @@ public class CafeBeverageAPI {
 
     @PostMapping("{productId}/like")
     public ApiResponse<?> likeBeverage(@PathVariable UUID productId) {
-        beverageLikeService.likeBeverage(MEMBER_ID, productId);
-        return ApiResponse.success("ok");
+        BeverageLikeDto likeDto = beverageLikeService.likeBeverage(MEMBER_ID, productId);
+        return ApiResponse.success(likeDto);
     }
 
     @DeleteMapping("{productId}/unlike")
     public ApiResponse<?> unlikeBeverage(@PathVariable UUID productId) {
-        beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
-        return ApiResponse.success("ok");
+        BeverageLikeDto unlikeDto = beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
+        return ApiResponse.success(unlikeDto);
     }
 }

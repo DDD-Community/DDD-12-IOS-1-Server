@@ -1,5 +1,6 @@
 package be.ddd.application.beverage;
 
+import be.ddd.api.dto.res.BeverageLikeDto;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberBeverageLike;
@@ -20,34 +21,44 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class BeverageLikeServiceImpl implements BeverageLikeService {
 
-    private final MemberBeverageLikeRepository memberBeverageLikeRepository;
-    private final MemberRepository memberRepository;
-    private final CafeBeverageRepository cafeBeverageRepository;
+    private final MemberBeverageLikeRepository likeRepo;
+    private final MemberRepository memberRepo;
+    private final CafeBeverageRepository beverageRepo;
 
     @Override
-    public void likeBeverage(Long memberId, UUID productId) {
-        Member member =
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        CafeBeverage beverage =
-                cafeBeverageRepository
-                        .findByProductId(productId)
-                        .orElseThrow(CafeBeverageNotFoundException::new);
+    public BeverageLikeDto likeBeverage(Long memberId, UUID productId) {
+        Member member = findMember(memberId);
+        CafeBeverage bev = findBeverage(productId);
 
-        if (memberBeverageLikeRepository
-                .findByMemberIdAndBeverageProductId(memberId, productId)
-                .isPresent()) {
+        if (likeRepo.existsByMemberIdAndBeverageProductId(memberId, productId)) {
             throw new AlreadyLikeBeverageException();
         }
 
-        memberBeverageLikeRepository.save(new MemberBeverageLike(member, beverage));
+        likeRepo.save(new MemberBeverageLike(member, bev));
+        return toDto(bev.getProductId(), true);
     }
 
     @Override
-    public void unlikeBeverage(Long memberId, UUID productId) {
-        MemberBeverageLike memberBeverageLike =
-                memberBeverageLikeRepository
-                        .findByMemberIdAndBeverageProductId(memberId, productId)
-                        .orElseThrow(LikeNotFoundException::new);
-        memberBeverageLikeRepository.delete(memberBeverageLike);
+    public BeverageLikeDto unlikeBeverage(Long memberId, UUID productId) {
+        if (!likeRepo.existsByMemberIdAndBeverageProductId(memberId, productId)) {
+            throw new LikeNotFoundException();
+        }
+        likeRepo.deleteByMemberIdAndBeverageProductId(memberId, productId);
+        return toDto(productId, false);
+    }
+
+    private Member findMember(Long memberId) {
+        return memberRepo.findById(memberId).orElseThrow(MemberNotFoundException::new);
+    }
+
+    private CafeBeverage findBeverage(UUID productId) {
+        return beverageRepo
+                .findByProductId(productId)
+                .orElseThrow(CafeBeverageNotFoundException::new);
+    }
+
+    private BeverageLikeDto toDto(UUID productId, boolean liked) {
+        long likeCount = likeRepo.countByBeverageProductId(productId);
+        return new BeverageLikeDto(productId, liked, likeCount);
     }
 }
