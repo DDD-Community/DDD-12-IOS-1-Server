@@ -48,14 +48,15 @@ public class CafeBeverageAPI {
     }
 
     @GetMapping("{productId}")
-    public ApiResponse<?> getCafeBeverageByProductId(@PathVariable("productId") UUID productId) {
+    public ApiResponse<CafeBeverageDetailsDto> getCafeBeverageByProductId(
+            @PathVariable("productId") UUID productId) {
         CafeBeverageDetailsDto beverageDetails =
                 cafeBeverageQueryService.getCafeBeverageByProductId(productId);
         return ApiResponse.success(beverageDetails);
     }
 
     @GetMapping("count")
-    public ApiResponse<?> getBeverageCountByBrandAndSugarLevel(
+    public ApiResponse<BeverageCountDto> getBeverageCountByBrandAndSugarLevel(
             @RequestParam(required = false) String cafeBrand) {
         Optional<CafeBrand> brand =
                 Optional.ofNullable(cafeBrand).flatMap(CafeBrand::findByDisplayName);
@@ -65,13 +66,13 @@ public class CafeBeverageAPI {
     }
 
     @PostMapping("{productId}/like")
-    public ApiResponse<?> likeBeverage(@PathVariable UUID productId) {
+    public ApiResponse<BeverageLikeDto> likeBeverage(@PathVariable UUID productId) {
         BeverageLikeDto likeDto = beverageLikeService.likeBeverage(MEMBER_ID, productId);
         return ApiResponse.success(likeDto);
     }
 
     @DeleteMapping("{productId}/unlike")
-    public ApiResponse<?> unlikeBeverage(@PathVariable UUID productId) {
+    public ApiResponse<BeverageLikeDto> unlikeBeverage(@PathVariable UUID productId) {
         BeverageLikeDto unlikeDto = beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
         return ApiResponse.success(unlikeDto);
     }
