@@ -1,8 +1,15 @@
+buildscript {
+    dependencies {
+        classpath 'org.flywaydb:flyway-mysql:9.16.3'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id("com.diffplug.spotless") version "7.0.3"
+    id "org.flywaydb.flyway" version "9.16.3"
 }
 
 group = 'be.ddd'
@@ -25,11 +32,14 @@ repositories {
 
 spotless {
     java {
+        target 'src/**/*.java'
         googleJavaFormat().aosp()
         importOrder(['java', 'javax', 'org', 'com', 'static'] as String)
         trimTrailingWhitespace()
         endWithNewline()
         removeUnusedImports()
+
+        targetExclude 'build/generated/querydsl/**'
     }
 }
 
@@ -56,8 +66,33 @@ dependencies {
 
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //batch
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient 용
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+    //querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
 
+def querydslSrcDir = 'build/generated/querydsl'
+
+tasks.withType(JavaCompile) {
+    options.generatedSourceOutputDirectory = file(querydslSrcDir)
+}
+
+sourceSets {
+    main {
+        java.srcDirs += "$buildDir/generated/querydsl"
+    }
+}
+
+clean {
+    delete file(querydslSrcDir)
+}
 tasks.register('initGitHooks', Copy) {
     from("$rootDir/githooks") {
         include 'pre-commit'
@@ -82,4 +117,13 @@ tasks.named('clean') {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+flyway {
+    url = findProperty('flywayUrl') ?: System.getenv('FLYWAY_URL')
+    user = findProperty('flywayUser') ?: System.getenv('FLYWAY_USER')
+    password = findProperty('flywayPassword') ?: System.getenv('FLYWAY_PASSWORD')
+    locations = ['classpath:db/migration']
+    baselineOnMigrate = true
+    cleanDisabled = false
 }

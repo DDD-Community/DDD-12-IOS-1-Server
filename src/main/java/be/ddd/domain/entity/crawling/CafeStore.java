@@ -33,4 +33,14 @@ public class CafeStore extends BaseTimeEntity {
     /*만약 카페 위치를 도입하게 된다면, 별도의 테이블로 CafeStore와 매핑하거나
     CafeBrand 클래스를가지고 있는 클래스로 분리*/
 
+    public CafeStore(CafeBrand cafeBrand, List<CafeBeverage> beverages) {
+        this.cafeBrand = cafeBrand;
+        this.beverages = beverages;
+    }
+
+    public static CafeStore of(CafeBrand brand) {
+        CafeStore store = new CafeStore();
+        store.cafeBrand = brand;
+        return store;
+    }
 }

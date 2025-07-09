@@ -28,15 +28,16 @@ CREATE TABLE cafe_stores
 -- 카페 음료 정보 테이블
 CREATE TABLE cafe_beverages
 (
-    cafe_beverage_id BIGINT PRIMARY KEY,
+    cafe_beverage_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name             VARCHAR(255) NOT NULL,
+    product_id       BINARY(16)   NOT NULL UNIQUE,
     cafe_store_id    BIGINT       NOT NULL,
-    serving_kcal     INT          NOT NULL,
-    saturated_fat_g  DOUBLE       NOT NULL,
-    protein_g        DOUBLE       NOT NULL,
-    sodium_mg        INT          NOT NULL,
-    sugar_g          INT          NOT NULL,
-    caffeine_mg      INT          NOT NULL,
+    serving_kcal     INT          NOT NULL DEFAULT 0,
+    saturated_fat_g  DOUBLE       NOT NULL DEFAULT 0,
+    protein_g        DOUBLE       NOT NULL DEFAULT 0,
+    sodium_mg        INT          NOT NULL DEFAULT 0,
+    sugar_g          INT          NOT NULL DEFAULT 0,
+    caffeine_mg      INT          NOT NULL DEFAULT 0,
     beverage_type    VARCHAR(100) NOT NULL,
     created_date     DATETIME     NOT NULL,
     update_date      DATETIME,
