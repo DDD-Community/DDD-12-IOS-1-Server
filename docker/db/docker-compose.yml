@@ -12,6 +12,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: humanneverdie
       MYSQL_DATABASE: ahmatdang
+    networks:
+      - ahmatdang-network
 
 networks:
   ahmatdang-network:
