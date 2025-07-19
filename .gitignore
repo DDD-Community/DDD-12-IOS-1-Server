@@ -37,5 +37,5 @@ out/
 .vscode/
 
 application*.yml
-docekr/db/db
+docker/db/db
 gradle.properties
