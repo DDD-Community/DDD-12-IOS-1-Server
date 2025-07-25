@@ -1,9 +1,6 @@
 package be.ddd.api.cafe;
 
-import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageLikeDto;
-import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
-import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.*;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
@@ -75,5 +72,12 @@ public class CafeBeverageAPI {
     public ApiResponse<BeverageLikeDto> unlikeBeverage(@PathVariable UUID productId) {
         BeverageLikeDto unlikeDto = beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
         return ApiResponse.success(unlikeDto);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<BeverageSearchResultDto> searchBeverages(@RequestParam String keyword) {
+        BeverageSearchResultDto beverageSearchResultDto =
+                cafeBeverageQueryService.searchBeverages(keyword, MEMBER_ID);
+        return ApiResponse.success(beverageSearchResultDto);
     }
 }
