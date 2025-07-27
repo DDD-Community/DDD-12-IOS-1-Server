@@ -1,6 +1,7 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageSearchResultDto;
 import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
@@ -20,4 +21,6 @@ public interface CafeBeverageQueryService {
     CafeBeverageDetailsDto getCafeBeverageByProductId(UUID productId);
 
     BeverageCountDto getBeverageCountByBrandAndSugarLevel(Optional<CafeBrand> brandFilter);
+
+    BeverageSearchResultDto searchBeverages(String keyword, Long memberId);
 }
