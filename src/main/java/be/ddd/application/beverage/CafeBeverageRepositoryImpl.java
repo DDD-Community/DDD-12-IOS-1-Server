@@ -1,8 +1,10 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
+import be.ddd.application.beverage.dto.QBeverageSearchDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.QCafeBeverage;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -40,6 +42,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
+                                beverage.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
                 .leftJoin(memberBeverageLike)
@@ -118,5 +121,29 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
             return beverage.beverageNutrition.sugarG.between(1, 20);
         }
         return null;
+    }
+
+    @Override
+    public List<BeverageSearchDto> searchByName(String keyword, Long memberId) {
+        return queryFactory
+                .select(
+                        new QBeverageSearchDto(
+                                beverage.id,
+                                beverage.productId,
+                                beverage.name,
+                                beverage.imgUrl,
+                                beverage.beverageType,
+                                Projections.constructor(
+                                        CafeStoreDto.class, beverage.cafeStore.cafeBrand),
+                                beverage.beverageNutrition,
+                                memberBeverageLike.isNotNull()))
+                .from(beverage)
+                .leftJoin(memberBeverageLike)
+                .on(
+                        beverage.id
+                                .eq(memberBeverageLike.beverage.id)
+                                .and(memberBeverageLike.member.id.eq(memberId)))
+                .where(beverage.name.containsIgnoreCase(keyword))
+                .fetch();
     }
 }
