@@ -1,5 +1,6 @@
 package be.ddd.api.member.intake;
 
+import be.ddd.api.dto.req.IntakeHistoryDeleteReqDto;
 import be.ddd.api.dto.req.IntakeRegistrationRequestDto;
 import be.ddd.api.dto.res.DailyIntakeDto;
 import be.ddd.application.member.intake.IntakeHistoryCommandService;
@@ -9,6 +10,7 @@ import be.ddd.common.validation.NotFutureDate;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -58,5 +60,13 @@ public class IntakeHistoryAPI {
         List<DailyIntakeDto> monthlyIntake =
                 intakeHistoryQuery.getMonthlyIntakeHistory(MEMBER_ID, dateInMonth);
         return ApiResponse.success(monthlyIntake);
+    }
+
+    @DeleteMapping("/{productId}")
+    public ApiResponse<?> deleteMemberIntakeHistory(
+            @PathVariable("productId") UUID productId, @RequestBody IntakeHistoryDeleteReqDto req) {
+        intakeHistoryCommand.deleteIntakeHistory(MEMBER_ID, productId, req.intakeTime());
+
+        return ApiResponse.success("deleted");
     }
 }

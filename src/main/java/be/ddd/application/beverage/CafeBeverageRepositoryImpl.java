@@ -1,11 +1,14 @@
 package be.ddd.application.beverage;
 
+import static com.querydsl.core.types.dsl.Expressions.*;
+
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.application.beverage.dto.QBeverageSearchDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
+import be.ddd.domain.entity.crawling.QBeverageSizeInfo;
 import be.ddd.domain.entity.crawling.QCafeBeverage;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import be.ddd.domain.entity.member.QMemberBeverageLike;
@@ -13,6 +16,7 @@ import be.ddd.domain.repo.CafeBeverageRepositoryCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
 import java.util.List;
@@ -25,6 +29,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
 
     private final JPAQueryFactory queryFactory;
     private final QCafeBeverage beverage = QCafeBeverage.cafeBeverage;
+    private final QBeverageSizeInfo beverageSizeInfo = QBeverageSizeInfo.beverageSizeInfo;
     private final QMemberBeverageLike memberBeverageLike = QMemberBeverageLike.memberBeverageLike;
 
     @Override
@@ -42,9 +47,10 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
-                                beverage.beverageNutrition,
+                                beverageSizeInfo.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
+                .leftJoin(beverage.sizes, beverageSizeInfo)
                 .leftJoin(memberBeverageLike)
                 .on(
                         beverage.id
@@ -115,16 +121,22 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
             return null;
         }
         if (sugarLevel == SugarLevel.ZERO) {
-            return beverage.beverageNutrition.sugarG.eq(0);
+            return beverage.sizes.any().beverageNutrition.sugarG.eq(0);
         }
         if (sugarLevel == SugarLevel.LOW) {
-            return beverage.beverageNutrition.sugarG.between(1, 20);
+            return beverage.sizes.any().beverageNutrition.sugarG.between(1, 20);
         }
         return null;
     }
 
     @Override
     public List<BeverageSearchDto> searchByName(String keyword, Long memberId) {
+
+        String booleanWildcard = "+" + keyword + "*";
+        NumberExpression<Double> relevance = calculateRelevance(booleanWildcard);
+        NumberExpression<Integer> likeOrder = calculateLikeOrder();
+        BooleanExpression isLiked = isLikedBeverage();
+
         return queryFactory
                 .select(
                         new QBeverageSearchDto(
@@ -135,15 +147,35 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
-                                beverage.beverageNutrition,
-                                memberBeverageLike.isNotNull()))
+                                beverageSizeInfo.beverageNutrition,
+                                isLiked))
                 .from(beverage)
+                .leftJoin(beverage.sizes, beverageSizeInfo)
                 .leftJoin(memberBeverageLike)
                 .on(
                         beverage.id
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)))
-                .where(beverage.name.containsIgnoreCase(keyword))
+                .where(relevance.gt(0))
+                .orderBy(likeOrder.desc(), relevance.desc())
                 .fetch();
+    }
+
+    private NumberExpression<Double> calculateRelevance(String booleanWildcard) {
+        return numberTemplate(
+                Double.class, "fulltext_match({0}, {1})", beverage.name, constant(booleanWildcard));
+    }
+
+    private NumberExpression<Integer> calculateLikeOrder() {
+        return numberTemplate(
+                Integer.class,
+                "case when {0} is not null then 1 else 0 end",
+                memberBeverageLike.beverage.id);
+    }
+
+    private BooleanExpression isLikedBeverage() {
+        return booleanTemplate(
+                "case when {0} is not null then true else false end",
+                memberBeverageLike.beverage.id);
     }
 }
