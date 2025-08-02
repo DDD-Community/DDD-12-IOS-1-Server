@@ -6,10 +6,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class MemberHealthMetric {
 
     private Integer age;
@@ -26,16 +28,22 @@ public class MemberHealthMetric {
     @Enumerated(EnumType.STRING)
     private ActivityRange activityRange;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sugar_intake_level")
+    private SugarIntakeLevel sugarIntakeLevel;
+
     public MemberHealthMetric(
             Integer age,
             Integer heightCm,
             BigDecimal weightKg,
             Gender gender,
-            ActivityRange activityRange) {
+            ActivityRange activityRange,
+            SugarIntakeLevel sugarIntakeLevel) {
         this.age = age;
         this.heightCm = heightCm;
         this.weightKg = weightKg;
         this.gender = gender;
         this.activityRange = activityRange;
+        this.sugarIntakeLevel = sugarIntakeLevel;
     }
 }

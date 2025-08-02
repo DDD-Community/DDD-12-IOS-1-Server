@@ -18,7 +18,14 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(
             HttpStatus.BAD_REQUEST,
             "입력 값이 올바르지 않습니다.",
-            Set.of(MethodArgumentNotValidException.class, ConstraintViolationException.class)),
+            Set.of(
+                    MethodArgumentNotValidException.class,
+                    ConstraintViolationException.class,
+                    InvalidInputException.class)),
+    FUTURE_DATE_NOT_ALLOWED(
+            HttpStatus.BAD_REQUEST,
+            "미래 날짜는 허용되지 않습니다.",
+            Set.of(FutureDateNotAllowedException.class)),
     METHOD_NOT_ALLOWED(
             HttpStatus.METHOD_NOT_ALLOWED,
             "지원하지 않는 HTTP 메서드입니다.",
@@ -40,7 +47,13 @@ public enum ErrorCode {
             Set.of(MemberBeverageLikeNotFoundException.class)),
 
     // like
-    LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "찜 정보를 찾을 수 없습니다.", Set.of(LikeNotFoundException.class));
+    LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "찜 정보를 찾을 수 없습니다.", Set.of(LikeNotFoundException.class)),
+
+    // intakeHistory
+    INTAKE_HISTORY_NOT_FOUND(
+            HttpStatus.BAD_REQUEST,
+            "음료 섭취 기록을 찾을 수 없습니다.",
+            Set.of(IntakeHistoryNotFoundException.class));
 
     private final HttpStatusCode status;
     private final String code;

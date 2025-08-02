@@ -1,9 +1,6 @@
 package be.ddd.api.cafe;
 
-import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageLikeDto;
-import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
-import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.*;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
@@ -12,11 +9,15 @@ import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/cafe-beverages")
 @RequiredArgsConstructor
@@ -75,5 +76,21 @@ public class CafeBeverageAPI {
     public ApiResponse<BeverageLikeDto> unlikeBeverage(@PathVariable UUID productId) {
         BeverageLikeDto unlikeDto = beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
         return ApiResponse.success(unlikeDto);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<BeverageSearchResultDto> searchBeverages(
+            @RequestParam(required = false) String keyword) {
+
+        String targetKeyword = (keyword == null ? "" : keyword).trim();
+
+        if (!StringUtils.hasText(targetKeyword)) {
+            log.info("Empty keyword");
+            return ApiResponse.success(new BeverageSearchResultDto(List.of(), 0));
+        }
+
+        BeverageSearchResultDto beverageSearchResultDto =
+                cafeBeverageQueryService.searchBeverages(targetKeyword, MEMBER_ID);
+        return ApiResponse.success(beverageSearchResultDto);
     }
 }

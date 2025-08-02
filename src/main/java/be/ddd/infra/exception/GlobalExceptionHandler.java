@@ -1,12 +1,11 @@
 package be.ddd.infra.exception;
 
+import be.ddd.common.validation.NotFutureDate;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,9 +35,17 @@ public class GlobalExceptionHandler {
         if (exceptionMap.containsKey(e.getClass())) {
             ErrorCode errorCode = exceptionMap.get(e.getClass());
             Object data = parseErrorData(e);
+            String message;
+            if (data instanceof List<?> errorList
+                    && !errorList.isEmpty()
+                    && errorList.get(0) instanceof FieldError fe) {
+                message = (errorList.size() == 1) ? fe.message() : errorCode.getMessage();
+            } else {
+                message = errorCode.getMessage();
+            }
             ErrorResponse errorRes =
                     ErrorResponse.of(
-                            errorCode.getMessage(),
+                            message,
                             errorCode.getStatus().value(),
                             Instant.now(),
                             request.getRequestURI());
@@ -54,6 +61,34 @@ public class GlobalExceptionHandler {
                                 ErrorCode.INTERNAL_SERVER_ERROR.getStatus().value(),
                                 Instant.now(),
                                 request.getRequestURI()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException e, HttpServletRequest request) {
+
+        Optional<String> futureDateMsg =
+                e.getConstraintViolations().stream()
+                        .filter(
+                                v ->
+                                        v.getConstraintDescriptor().getAnnotation()
+                                                instanceof NotFutureDate)
+                        .map(ConstraintViolation::getMessage)
+                        .findFirst();
+
+        ErrorCode errorCode =
+                futureDateMsg.isPresent()
+                        ? ErrorCode.FUTURE_DATE_NOT_ALLOWED
+                        : ErrorCode.INVALID_INPUT_VALUE;
+
+        String message = futureDateMsg.orElse(errorCode.getMessage());
+        ErrorResponse errorRes =
+                ErrorResponse.of(
+                        message,
+                        errorCode.getStatus().value(),
+                        Instant.now(),
+                        request.getRequestURI());
+        return ResponseEntity.status(errorCode.getStatus()).body(errorRes);
     }
 
     private Object parseErrorData(Exception e) {

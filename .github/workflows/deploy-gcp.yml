@@ -1,0 +1,96 @@
+name: CI/CD → GCP VM with Docker & Jasypt
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{secrets.GCP_PROJECT_ID }}
+  LOCATION: ${{secrets.GCP_LOCATION }}
+  REPOSITORY: ${{secrets.GCP_REPOSITORY }}
+  IMAGE_NAME: ${{secrets.GCP_IMAGE_NAME }}
+  IMAGE_TAG: ${{ secrets.GCP_TAG }}
+
+  # VM 정보 (Terraform으로 생성된 값)
+  VM_NAME: ${{secrets.VM_INSTANCE_NAME }}
+  VM_ZONE: ${{secrets.VM_ZONE }}
+
+  # 컨테이너 이름
+  CONTAINER_NAME: ${{secrets.CONTAINER_NAME }}
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
+
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "▶ IMAGE_URI = $IMAGE_URI"
+
+          docker build --platform linux/amd64 -t "$IMAGE_URI" .
+          docker push     "$IMAGE_URI"
+
+  deploy:
+    name: Deploy to GCP VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate to GCP for Deploy
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: SSH & Deploy
+        uses: google-github-actions/ssh-compute@v1
+        with:
+          project_id: ${{env.PROJECT_ID}}
+          zone: ${{ env.VM_ZONE }}
+          instance_name: ${{ env.VM_NAME }}
+          user: ubuntu
+          ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
+          command: >
+            set -e &&
+            gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet &&
+            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" &&
+            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
+            docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
+            docker pull "$IMAGE_URI" &&
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              -e JASYPT_ENCRYPTOR_PASSWORD="${{ secrets.JASYPT_PASSWORD }}" \
+              "$IMAGE_URI"
+
+      - name: Notify Discord
+        if: ${{ success() }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"content":"서버 정상배포되었습니다 🎉"}' \
+               ${{ secrets.DISCORD_SERVER_NOTIFY_WEBHOOK}}
